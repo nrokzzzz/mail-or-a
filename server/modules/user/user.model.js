@@ -27,6 +27,18 @@ const userSchema = new mongoose.Schema(
       default: "local",
     },
 
+    googleId: {
+      type: String,
+      unique: true,
+      sparse: true,
+    },
+
+    microsoftId: {
+      type: String,
+      unique: true,
+      sparse: true,
+    },
+
     mobileNumber: {
       type: String,
       unique: true,
@@ -62,6 +74,21 @@ const userSchema = new mongoose.Schema(
         trim: true,
       },
     ],
+
+    passwordResetOtp: {
+      type: String,
+      select: false,
+    },
+
+    passwordResetOtpExpiry: {
+      type: Date,
+      select: false,
+    },
+
+    passwordResetToken: {
+      type: String,
+      select: false,
+    },
   },
   { timestamps: true }
 );

@@ -4,12 +4,13 @@ const { google } = require("googleapis");
 
 /**
  * Create OAuth2 client
+ * @param {string} [redirectUri] - override redirect URI (defaults to GOOGLE_REDIRECT_URI for Gmail connection)
  */
-exports.getGoogleOAuthClient = () => {
+exports.getGoogleOAuthClient = (redirectUri) => {
   return new google.auth.OAuth2(
     process.env.GOOGLE_CLIENT_ID,
     process.env.GOOGLE_CLIENT_SECRET,
-    process.env.GOOGLE_REDIRECT_URI
+    redirectUri || process.env.GOOGLE_REDIRECT_URI
   );
 };
 
