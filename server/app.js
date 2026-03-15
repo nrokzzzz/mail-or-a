@@ -14,6 +14,9 @@ app.use(
     credentials: true,
   })
 );
+app.get('/',(req,res)=>{
+  res.send("Hello");
+})
 app.use(helmet());
 app.use(morgan("dev"));
 app.use("/api/auth", require("./modules/auth/auth.routes"));
