@@ -103,7 +103,7 @@ exports.googleCallback = async (req, res) => {
       refreshToken: tokens.refresh_token,
       tokenExpiry: tokens.expiry_date
         ? new Date(tokens.expiry_date)
-        : null,
+        : new Date(Date.now() + 3600 * 1000), // default 1 hour if Google doesn't provide it
       lastHistoryId: watchResponse.data.historyId,
       isActive: true,
     });

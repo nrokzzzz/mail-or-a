@@ -66,7 +66,8 @@ const userSchema = new mongoose.Schema(
       },
     },
 
-    resumeUrl: String,
+    resumeUrl: String,    // S3 public URL
+    resumeS3Key: String,  // S3 object key (for deletion)
 
     extractedSkills: [
       {

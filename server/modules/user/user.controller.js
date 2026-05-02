@@ -1,8 +1,9 @@
 const { extractSkills } = require("../../services/gemini.service");
+const { uploadToS3 } = require("../../services/s3.service");
 const User = require("./user.model");
 const pdfParse = require("pdf-parse");
-const fs = require("fs");
 const mammoth = require("mammoth");
+
 // GET current user profile
 exports.getProfile = async (req, res) => {
   try {
@@ -34,32 +35,45 @@ exports.updateProfile = async (req, res) => {
 
 exports.uploadResume = async (req, res) => {
   try {
-    const filePath = req.file.path;
-    const dataBuffer = await fs.promises.readFile(filePath);
+    // Guard — no file uploaded
+    if (!req.file) {
+      return res.status(400).json({ message: "Please upload a PDF or DOCX file." });
+    }
 
+    const fileBuffer = req.file.buffer;
+
+    // Extract text from resume
     let extractedText;
 
     if (req.file.mimetype === "application/pdf") {
-      const parsed = await pdfParse(dataBuffer);
+      const parsed = await pdfParse(fileBuffer);
       extractedText = parsed.text;
     } else {
-      const result = await mammoth.extractRawText({ buffer: dataBuffer });
+      const result = await mammoth.extractRawText({ buffer: fileBuffer });
       extractedText = result.value;
     }
 
+    // Extract skills via Gemini AI
     const skills = await extractSkills(extractedText);
 
-    const user = await User.findById(req.user._id);
-    user.resumeUrl = filePath;
-    user.extractedSkills = skills;
+    // Upload to S3
+    const { url, key } = await uploadToS3(
+      fileBuffer,
+      req.file.originalname,
+      req.file.mimetype,
+      req.user._id.toString()
+    );
 
+    // Save to user profile
+    const user = await User.findById(req.user._id);
+    user.resumeUrl = url;
+    user.resumeS3Key = key;
+    user.extractedSkills = skills;
     await user.save();
 
-    // cleanup
-    await fs.promises.unlink(filePath).catch(e => console.error("Failed to cleanup resume", e));
-
     res.json({
-      message: "Resume processed",
+      message: "Resume processed and uploaded",
+      resumeUrl: url,
       skills,
     });
   } catch (error) {

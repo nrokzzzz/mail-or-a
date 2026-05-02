@@ -6,19 +6,19 @@ const cookieParser = require("cookie-parser");
 
 const app = express();
 
+app.use(helmet());
+app.use(morgan("dev"));
 app.use(cookieParser());
 app.use(express.json());
 app.use(
   require("cors")({
-    origin: "http://localhost:5174",
+    origin: ["https://mail-or-a.dev", "http://localhost:5174"],
     credentials: true,
   })
 );
 app.get('/', (req, res) => {
   res.send("Hello NaGu");
 })
-app.use(helmet());
-app.use(morgan("dev"));
 app.use("/api/auth", require("./modules/auth/auth.routes"));
 app.use("/api/auth", require("./modules/auth/socialAuth.routes")); // Google + Microsoft sign-in
 app.use("/api/user", require("./modules/user/user.routes"));

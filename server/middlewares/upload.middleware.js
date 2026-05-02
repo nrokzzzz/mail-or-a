@@ -1,14 +1,14 @@
 const multer = require("multer");
 
-const storage = multer.diskStorage({
-  destination: "uploads/",
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + "-" + file.originalname);
-  },
-});
+// Use memory storage — file is held in req.file.buffer (never written to disk)
+// This buffer is sent directly to S3
+const storage = multer.memoryStorage();
 
 const upload = multer({
   storage,
+  limits: {
+    fileSize: 5 * 1024 * 1024, // 5 MB max
+  },
   fileFilter: (req, file, cb) => {
     const allowedTypes = [
       "application/pdf",
